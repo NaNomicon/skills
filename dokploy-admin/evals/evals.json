@@ -1,0 +1,63 @@
+{
+  "skill_name": "dokploy-admin",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Deploy my GitHub-based Next.js app to an existing Dokploy production project, set env vars safely, attach app.example.com with HTTPS, and verify real reachability.",
+      "expected_output": "Chooses MCP-first workflow, configures source/build/env/domain in safe sequence, deploys, and verifies logs + HTTP reachability.",
+      "files": [],
+      "expectations": [
+        "Chooses MCP before API/CLI/SSH unless unavailable.",
+        "Separates configuration steps from deployment.",
+        "Avoids secret leakage while handling environment variables.",
+        "Includes post-deploy verification beyond dashboard status."
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "MCP tools are unavailable in this session. I still need to roll out an environment-variable update and redeploy an app safely. What method do you use and how?",
+      "expected_output": "Selects API fallback, outlines auth/state-read/minimal-mutation/redeploy/verification flow, and keeps secrets protected.",
+      "files": [],
+      "expectations": [
+        "Explicitly selects API because MCP is unavailable.",
+        "Performs read-before-write sequence.",
+        "Includes redeploy and verification plan.",
+        "Mentions secret-safe handling."
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Our ops box already has Dokploy CLI configured. We need to quickly restart a failing app and confirm it is healthy again.",
+      "expected_output": "Chooses CLI in a preconfigured environment, performs minimal restart/redeploy sequence, and verifies health + logs.",
+      "files": [],
+      "expectations": [
+        "Uses CLI only after acknowledging preconfigured availability.",
+        "Applies smallest operational fix first.",
+        "Validates result with logs/health checks."
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Dokploy shows my app as running, but the public domain returns 502. Give the best troubleshooting path.",
+      "expected_output": "Starts with Dokploy-level inspection, then escalates to SSH/Docker/Traefik runtime checks only if needed.",
+      "files": [],
+      "expectations": [
+        "Starts with panel-level diagnostics before host-level access.",
+        "Checks target port, backend health, and router mapping.",
+        "Escalates to SSH/Docker as fallback, not default."
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "My Dokploy compose deployment loses state after redeploys, and I need backup support. What persistence strategy and rollout plan should I use?",
+      "expected_output": "Explains bind-mount vs named-volume tradeoffs, recommends named volumes when backups matter, and provides migration + persistence verification steps.",
+      "files": [],
+      "expectations": [
+        "Differentiates bind mounts and named volumes.",
+        "Prefers named volumes for backup/restore requirements.",
+        "Warns against relying on non-persistent paths for durable state.",
+        "Includes redeploy persistence verification."
+      ]
+    }
+  ]
+}
