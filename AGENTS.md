@@ -1,0 +1,230 @@
+# AGENTS.md
+
+## Purpose
+
+This file defines repository-specific guidance for agentic coding agents working in:
+
+`/Users/nhanlc/para/1-projects/work/open-source/skills`
+
+Treat it as the local source of truth for repository structure, validation, content style, and git hygiene.
+
+---
+
+## Repository Scope
+
+This repository is a collection of reusable skills.
+
+Current visible structure:
+
+- `.git/`
+- `README.md`
+- `AGENTS.md`
+- `<skill-name>/`
+  - `SKILL.md`
+  - `references/*.md`
+  - `evals/evals.json`
+
+At the moment, `dokploy-admin/` is the existing example skill.
+
+---
+
+## Rule File Discovery
+
+Checked repository-local rule sources:
+
+- `.cursorrules`
+- `.cursor/rules/**`
+- `.github/copilot-instructions.md`
+
+Result at time of writing: **none found**.
+
+If any of those files are added later, update this file and follow the stricter local rule set.
+
+---
+
+## Build / Lint / Test Commands
+
+This repository currently has **no project-wide build or lint toolchain** in-repo.
+There is no `package.json`, `pyproject.toml`, `Makefile`, `pytest.ini`, `ruff.toml`, or similar root config.
+
+Use the commands below as the canonical verification workflow.
+
+### Primary validation
+
+Validate a single skill directory:
+
+```bash
+python "/Users/nhanlc/.agents/skills/skill-creator/scripts/quick_validate.py" \
+  "/Users/nhanlc/para/1-projects/work/open-source/skills/<skill-name>"
+```
+
+### Single-test equivalents
+
+For this repo, “single test” means validating one skill package or one JSON artifact.
+
+Validate one skill package:
+
+```bash
+python "/Users/nhanlc/.agents/skills/skill-creator/scripts/quick_validate.py" \
+  "/Users/nhanlc/para/1-projects/work/open-source/skills/<skill-name>"
+```
+
+Validate one eval file:
+
+```bash
+python -m json.tool \
+  "/Users/nhanlc/para/1-projects/work/open-source/skills/<skill-name>/evals/evals.json" \
+  > /dev/null
+```
+
+### Repository sanity checks
+
+```bash
+git status
+git log --oneline -10
+```
+
+### If you add real code later
+
+If a future skill introduces scripts or source code with its own toolchain:
+
+1. use that toolchain for verification,
+2. document exact commands here,
+3. add a single-file or single-test command pattern here as well.
+
+Do not invent lint/test commands that are not backed by repository files.
+
+---
+
+## Repository Layout Conventions
+
+- Keep each skill self-contained in its own top-level directory.
+- Every skill must have a `SKILL.md` entrypoint.
+- Put long or specialized guidance in `references/`.
+- Put evaluation prompts in `evals/evals.json`.
+- Prefer modular references over one oversized document.
+- Keep the root `README.md` updated with one section per skill and its description.
+
+---
+
+## Content Style Guidelines
+
+These conventions are inferred from the existing skill content in this repo.
+
+### SKILL.md frontmatter
+
+- Start `SKILL.md` with YAML frontmatter.
+- Include `name` and `description` at minimum.
+- Keep descriptions trigger-oriented: say what the skill does and when to use it.
+- Keep compatibility notes concrete and tool-specific when needed.
+
+### Markdown style
+
+- Use clear section hierarchy with `##` and `###`.
+- Prefer operational, imperative phrasing.
+- Use concise bullets for rules, workflows, and checklists.
+- Use tables only when they genuinely improve decision-making.
+- Use fenced code blocks for commands and examples.
+- Keep headings descriptive enough that another agent can quickly scan the file.
+
+### JSON style
+
+- Use valid JSON only.
+- Use 2-space indentation.
+- Use double-quoted keys and strings.
+- Keep schema fields stable and explicit.
+- Use realistic prompts and expected outputs in eval files.
+
+---
+
+## Naming Conventions
+
+- Skill directories: kebab-case
+- Reference filenames: kebab-case
+- Use semantic names based on purpose, not implementation detail
+
+Examples:
+
+- `dokploy-admin`
+- `ssh-docker.md`
+- `source-notes.md`
+- `troubleshooting.md`
+
+---
+
+## Imports, Types, and Language-Specific Rules
+
+This repository currently contains documentation and JSON artifacts, not a source-code package.
+
+Because there is no repository-wide language toolchain yet:
+
+- do not invent import-order rules,
+- do not invent formatter-specific rules,
+- do not invent type-system rules.
+
+If code is added later, first add the relevant config in-repo, then extend this file with tool-backed conventions.
+
+---
+
+## Error Handling and Safety Guidance
+
+For skills and operational documentation in this repo:
+
+- prefer safest actions first,
+- inspect before mutating,
+- apply the smallest effective change,
+- require verification evidence after meaningful actions,
+- avoid broad destructive steps without explicit justification,
+- never expose secrets, tokens, or sensitive values in examples or logs.
+
+When writing operational skills, explain why a safer path is preferred instead of only issuing rigid commands.
+
+---
+
+## Git and Commit Conventions
+
+Use Conventional Commits:
+
+`type(scope): description`
+
+Observed local examples:
+
+- `feat(dokploy-admin): add core skill and method guides`
+- `docs(dokploy-admin): add ops troubleshooting refs`
+- `test(dokploy-admin): add eval scenarios`
+
+Guidelines:
+
+- keep commits atomic by concern,
+- split independent docs/evals/workflow changes when practical,
+- use `feat`, `docs`, `test`, `fix`, `chore` appropriately,
+- keep subject lines concise and imperative.
+
+---
+
+## Agent Working Rules
+
+- Prefer minimal, focused edits.
+- Match existing repository structure before adding new patterns.
+- Do not fabricate tools, commands, or config that do not exist.
+- Validate changed skills with `quick_validate.py`.
+- Re-check `git status` before finishing.
+- Update this `AGENTS.md` whenever repository structure or conventions materially change.
+
+---
+
+## Quick Finish Checklist
+
+- [ ] Edited the correct skill directory
+- [ ] `SKILL.md` still matches the bundled references
+- [ ] `evals/evals.json` is valid JSON
+- [ ] relevant `quick_validate.py` run passes
+- [ ] `README.md` still reflects available skills
+- [ ] `git status` shows only expected changes
+
+---
+
+## Maintenance Note
+
+Keep this file practical and repository-specific.
+As the skills collection grows, prefer updating this root file for shared rules and only add deeper `AGENTS.md` files when a subdirectory truly needs different local guidance.
