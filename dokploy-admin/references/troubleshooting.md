@@ -27,7 +27,11 @@ Follow symptom → diagnosis, escalating control planes safely.
 
 ## 4) Data/config lost after redeploy
 
-1. Inspect actual mounts
+1. Inspect actual mounts (ensure Type is 'bind' or 'volume' as intended)
+2. Confirm data path is persistent (named volume or intentional bind mount)
+3. Avoid relying on repository checkout paths for durable state
+4. Redeploy and verify persistence with a write/read test
+5. Check for "ghost directories": if a bind-mount source is missing on host, Docker may create an empty directory at that path.
 2. Confirm data path is persistent (named volume or intentional bind mount)
 3. Avoid relying on repository checkout paths for durable state
 4. Redeploy and verify persistence with a write/read test
@@ -38,3 +42,23 @@ Follow symptom → diagnosis, escalating control planes safely.
 2. Validate image pull/auth on all nodes
 3. Validate volume/path assumptions per node
 4. Re-check placement constraints and networking
+## 6) App crashes with \"is a directory\" for a config file mount
+
+1. **Symptom**: Deployment succeeded in UI, but container logs show "failed to read config file: ... is a directory".
+2. **Diagnosis**: Dokploy (or Docker) created the host source path as a directory instead of a file. This is a known issue where empty source paths trigger automatic directory creation before the file is materialized.
+3. **Investigation**:
+   - Verify the path type on the host with: `ls -ld /path/to/source`
+   - If `ls -ld` shows a directory (starts with `d`), you have found the cause.
+4. **Resolution**:
+   - SSH/Docker to the host.
+   - Remove the bad directory from host: `rm -rf /etc/dokploy/compose/<app>/files/<config-file>`
+   - Ensure `filePath` in Dokploy UI does NOT have a trailing slash.
+   - If the bug persists, switch to the \"Directory Mount\" workaround (see `references/mounts.md`) to avoid single-file bind mount limitations.
+
+1. Symptom: Deployment succeeded in UI, but container logs show "failed to read config file: ... is a directory".
+2. Diagnosis: Dokploy or Docker created the source path as a directory instead of a file.
+3. Escalation: SSH/Docker to inspect host path.
+4. Resolution:
+   - Remove the bad directory from host: `rm -rf /etc/dokploy/compose/<app>/files/<config-file>`
+   - Ensure `filePath` in Dokploy UI does NOT have a trailing slash.
+   - If bug persists, use "Directory Mount" workaround (see `references/mounts.md`).

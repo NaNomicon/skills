@@ -119,7 +119,8 @@ Path rewriting is powerful but easy to misuse; apps that generate absolute URLs 
 
 Dokploy docs recommend:
 
-- `../files/...` bind mounts for simple persistence and direct host access
+- `../files/...` bind mounts for simple persistence (mandatory for Compose file mounts)
+- named volumes for Docker-managed persistence and Dokploy backup support (best for databases)
 - named volumes for Docker-managed persistence and Dokploy backup support
 
 Good rule of thumb:

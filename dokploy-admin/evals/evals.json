@@ -58,6 +58,18 @@
         "Warns against relying on non-persistent paths for durable state.",
         "Includes redeploy persistence verification."
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "I set up a File Mount in Dokploy for my Compose service, but the app fails on startup with 'is a directory' error. How do you fix this?",
+      "expected_output": "Identifies the Dokploy trailing-slash behavior or Docker auto-creation bug, recommends SSH host-path cleanup, and advises on UI configuration fix.",
+      "files": [],
+      "expectations": [
+        "Diagnoses the 'is a directory' as a host-side path type mismatch.",
+        "Recommends removing the bad path from host via SSH.",
+        "Advises removing trailing slash from UI filePath.",
+        "Mentions the correct ../files/ prefix for Compose mounts."
+      ]
     }
   ]
 }

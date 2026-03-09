@@ -31,6 +31,8 @@ Use the first option that cleanly solves the task.
 | Team already uses authenticated Dokploy CLI | CLI | Fast terminal operations in known environments |
 | Panel state conflicts with runtime reality | SSH/Docker | Required for container/network/Traefik truth |
 | DNS/Traefik/Swarm node-level anomalies | SSH/Docker | Host-level inspection needed |
+| MCP/API behavior is ambiguous or buggy | Source Analysis | Use `librarian`/`explore` to find implementation truth |
+| DNS/Traefik/Swarm node-level anomalies | SSH/Docker | Host-level inspection needed |
 
 ## Operating rules
 
@@ -59,6 +61,9 @@ Use the first option that cleanly solves the task.
 - `references/cli.md` — CLI usage patterns and guardrails
 - `references/ssh-docker.md` — host/runtime fallback diagnostics
 - `references/troubleshooting.md` — symptom → diagnosis playbooks
+- `references/mounts.md` — mounts, volumes, and persistence guide
+- `references/dokploy-workflows.md` — consolidated workflow guide
+- `references/source-notes.md` — distilled rationale and source constraints
 - `references/dokploy-workflows.md` — consolidated workflow guide
 - `references/source-notes.md` — distilled rationale and source constraints
 

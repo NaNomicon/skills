@@ -23,6 +23,8 @@ docker logs --tail 100 <container>
 docker inspect <container-or-service>
 docker network inspect <network>
 docker volume ls
+ls -ld \u003cpath\u003e # Check if path is a file (-) or a directory (d)
+docker stats --no-stream
 docker stats --no-stream
 ```
 
