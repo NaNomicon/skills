@@ -1,0 +1,35 @@
+{
+  "skill_name": "dev-machine-storage-cleanup",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm running out of disk space on my development machine. Help me find and clean up storage.",
+      "expected_output": "Run investigation commands (df -h, du), identify storage consumers, present findings with explanations, ask user what to clean before executing",
+      "assertions": []
+    },
+    {
+      "id": 2,
+      "prompt": "My Mac is showing 5GB free and running slow. I'm a developer with Xcode, Docker, and various projects.",
+      "expected_output": "Detect macOS, check iOS Simulators, Docker, ~/Library/Caches, present options with sizes, explain what each is before cleaning",
+      "assertions": []
+    },
+    {
+      "id": 3,
+      "prompt": "Linux server is running low on space. I need to clean up safely - it has Docker and some Python projects.",
+      "expected_output": "Detect Linux, check /var/log, Docker system df, package manager cache, ~/.cache, present findings and ask confirmation before cleaning",
+      "assertions": []
+    },
+    {
+      "id": 4,
+      "prompt": "Can I safely delete the Docker images on my machine? I haven't used Docker in months.",
+      "expected_output": "Run docker system df to show usage, list images with sizes, explain which are safe to remove, confirm with user before running prune",
+      "assertions": []
+    },
+    {
+      "id": 5,
+      "prompt": "What's using all my disk space? I have npm, pip, go, and cargo installed.",
+      "expected_output": "Check all developer caches (~/.npm, ~/.cache/pip, ~/go/pkg/mod, ~/.cargo), show sizes, explain each and whether safe to clean",
+      "assertions": []
+    }
+  ]
+}
