@@ -42,6 +42,170 @@ bd doctor                                        # Check DB health
 
 **Priorities**: 0=Critical, 1=High, 2=Medium (default), 3=Low, 4=Backlog
 
+**Types**: `bug` | `feature` | `task` | `epic` | `chore` | `decision`
+
+**Statuses**: `open` | `in_progress` | `blocked` | `deferred` | `closed`
+---
+
+## Labels (Tags / Scopes)
+
+Free-form strings, multiple per issue. Primary scoping mechanism for agent role filtering.
+
+```bash
+bd create "..." --labels fe,auth,sprint-3    # Assign at creation
+bd label add bd-42 backend                   # Add label
+bd label remove bd-42 sprint-2               # Remove label
+bd label propagate bd-42                     # Push parent labels to all children
+bd label list bd-42                          # Labels on one issue
+bd label list-all                            # All labels in use across DB
+```
+
+Common patterns:
+- **Role**: `fe`, `be`, `mobile`, `devops`, `qa` — used by agents to filter `bd ready --label fe`
+- **Area**: `auth`, `payments`, `infra`
+- **Sprint/milestone**: `sprint-3`, `v1.2`
+
+Agents filter by role label: `bd ready --label fe --json` shows only frontend-tagged ready tasks.
+
+---
+
+## Dependencies & Relationships
+
+### Blocking deps (hard — blocks `bd ready`)
+
+```bash
+bd dep bd-xyz --blocks bd-abc        # bd-xyz must close before bd-abc is ready
+bd dep add bd-abc bd-xyz             # Same (bd-abc depends on bd-xyz)
+bd dep remove bd-abc bd-xyz          # Remove blocking dep
+```
+
+A task won't appear in `bd ready` until ALL its blockers are closed.
+
+### Soft relationships (non-blocking)
+
+```bash
+bd dep relate bd-abc bd-xyz          # Bidirectional relates_to (no blocking)
+bd dep unrelate bd-abc bd-xyz        # Remove relates_to link
+```
+
+### Discovery trail
+
+```bash
+bd create "..." --deps discovered-from:bd-20   # Audit trail: found while working on bd-20
+```
+
+### Visualize
+
+```bash
+bd dep tree bd-42                    # Full dependency tree
+bd dep list bd-42                    # Direct deps + dependents
+bd dep cycles                        # Detect circular dependencies
+```
+
+---
+
+## Hierarchy (Epics / Parent-Child)
+
+```bash
+bd create "Feature: Auth" -t epic               # Create epic
+bd create "Extract JWT" --parent bd-10          # Child of epic
+bd children bd-10                               # List children
+bd epic bd-10                                   # Epic-specific commands
+```
+
+Swarms are structured coordination groups (spawner + fanout/fanin gates):
+
+```bash
+bd swarm                             # Swarm management
+```
+
+---
+
+## Query Language
+
+Powerful compound filtering — agents use this to find exactly the right tasks:
+
+```bash
+bd query "priority<=1 AND label=fe AND status=open"
+bd query "type=bug AND created>2026-03-01"
+bd query "NOT assignee=none AND status!=closed"
+bd query "label=auth OR label=payments"
+bd query "title=login"                    # Contains search
+bd query "parent=bd-10"                   # All children of epic
+```
+
+Supported fields: `status`, `priority`, `type`, `assignee`, `label`, `title`, `description`,
+`notes`, `created`, `updated`, `closed`, `id`, `parent`, `pinned`, `ephemeral`
+
+---
+
+## Custom Metadata
+
+Arbitrary key-value on any issue — useful for agent-specific data:
+
+```bash
+bd create "..." --metadata '{"team":"platform","sprint":3}'
+bd update bd-42 --set-metadata team=platform
+bd update bd-42 --set-metadata sprint=3
+bd update bd-42 --unset-metadata sprint
+```
+
+Queryable: `bd query "metadata.team=platform"`
+
+---
+
+## Scheduling & Estimates
+
+```bash
+bd create "..." --due +2w              # Due in 2 weeks
+bd create "..." --defer tomorrow       # Hidden from bd ready until tomorrow
+bd create "..." --estimate 60          # 60 minute estimate
+bd update bd-42 --due "next monday"
+bd update bd-42 --defer "2026-04-01"   # Defer until date (clears: --defer "")
+```
+
+Deferred issues are invisible to `bd ready` until the date passes.
+
+---
+
+## External References
+
+Link to GitHub Issues, Jira, etc.:
+
+```bash
+bd create "..." --external-ref gh-9    # Links to GitHub issue #9
+bd create "..." --external-ref jira-ABC-123
+bd update bd-42 --external-ref gh-15
+```
+
+---
+
+## Agent Task Selection Patterns
+
+How agents should pick tasks efficiently:
+
+```bash
+# All ready tasks for my role
+bd ready --label be --json
+
+# Critical tasks first
+bd query "priority=0 AND status=open" --json
+
+# Ready tasks I previously started
+bd query "assignee=me AND status=in_progress" --json
+
+# What's blocking a specific task
+bd dep list bd-42 --json
+
+# Ready tasks in an epic
+bd ready --json | jq '[.[] | select(.parent == "bd-10")]'
+
+# Find duplicate/similar issues before creating
+bd find-duplicates "title of new issue"
+```
+
+Claim flow: `bd ready --json` → pick by priority+label → `bd update <id> --claim` → work → `bd close <id>`
+
 ---
 
 ## Agent Issue Workflow
