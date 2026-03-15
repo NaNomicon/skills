@@ -180,6 +180,85 @@ bd update bd-42 --external-ref gh-15
 
 ---
 
+## Issue Creation Conventions
+
+Soft rules — not enforced by bd, but agents should follow them for consistent, queryable issues.
+
+### Priority
+
+| Priority | When to use |
+|----------|-------------|
+| P0 (0) | Production outage, security hole, data loss |
+| P1 (1) | Blocking a release, major UX broken, critical path |
+| P2 (2) | Normal feature work, planned improvements (default) |
+| P3 (3) | Nice-to-have, cleanup, refactor with no deadline |
+| P4 (4) | Backlog — no timeline, future consideration |
+
+When in doubt, use P2. Agents should NOT self-escalate to P0/P1 without clear justification.
+
+### Labels / Tags
+
+Every issue SHOULD have:
+1. **Role label** — at least one of: `fe`, `be`, `mobile`, `devops`, `qa` (enables `bd ready --label <role>`)
+2. **Area label** — domain scoping: `auth`, `payments`, `infra`, `api`, etc. (optional but useful)
+3. **Sprint/milestone** — if known: `sprint-3`, `v1.2` (add when planning, propagate from epic)
+
+After setting labels on an epic: `bd label propagate <epic-id>` pushes labels to all children.
+
+### Hierarchy
+
+| Issue type | MUST | MUST NOT |
+|------------|------|----------|
+| `epic` | `--acceptance "..."` (done criteria) | `--parent` |
+| `task` (under epic) | `--parent <epic-id>` | Create without parent if epic exists |
+| `bug` | `--description` (steps to repro) | — |
+| Discovered sub-task | `--deps discovered-from:<current-id>` | — |
+
+Rule: if a Hive feature exists, create a matching `epic` and parent all tasks under it.
+
+### Dependencies
+
+| Dep type | When | Command |
+|----------|------|---------|
+| `blocks` | B cannot start until A finishes (hard gate) | `bd dep bd-A --blocks bd-B` |
+| `discovered-from` | Found while working on another task | `--deps discovered-from:bd-A` at create time |
+| `relates_to` | Informational, non-blocking | `bd dep relate bd-A bd-B` |
+| `waits-for` | Fanout gate (swarm pattern) | `--waits-for <spawner-id>` |
+
+Don't over-block — only add `blocks` deps when parallelism would cause real conflicts.
+
+### Metadata
+
+Use `--metadata` / `--set-metadata` for structured data agents and queries need:
+
+```bash
+bd create "..." --metadata '{"team":"platform","sprint":3,"hive-feature":"user-auth"}'
+bd update bd-42 --set-metadata pr=123          # Link PR when created
+bd update bd-42 --set-metadata github-issue=9  # Also use --external-ref gh-9
+```
+
+Recommended keys (conventions, not required):
+- `team` — owning team (`platform`, `growth`, `infra`)
+- `sprint` — sprint number (integer)
+- `hive-feature` — matching Hive feature name (links bd issue ↔ .hive/features/<name>)
+- `pr` — PR number once opened
+- `github-issue` — GH issue number (supplement to `--external-ref gh-N`)
+
+All metadata fields are queryable: `bd query "metadata.team=platform"`
+
+### GitHub Issue ↔ Beads Sync (Convention)
+
+No automated sync exists — this is a manual hand-off:
+
+1. Human opens GH Issue #N
+2. Agent creates bd task: `bd create "..." --external-ref gh-N --set-metadata github-issue=N`
+3. Agent works, opens PR with `Closes #N` in body
+4. Agent closes bd task: `bd close <id>`
+
+The `--external-ref gh-N` is the canonical link. Always set it when a GH issue exists.
+
+---
+
 ## Agent Task Selection Patterns
 
 How agents should pick tasks efficiently:
