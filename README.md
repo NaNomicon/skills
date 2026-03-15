@@ -36,3 +36,14 @@ npx skills add https://github.com/NaNomicon/skills --skill beads-hive-omo-workfl
 ```
 
 **Path:** `beads-hive-omo-workflow/SKILL.md`
+
+### `tilth`
+
+Runs tilth CLI for structural code navigation — reads files with smart outlining, searches symbols/text/regex, finds files by glob, and maps codebases. Use instead of read/grep/find for all source code exploration.
+
+**Install:** 
+```sh
+npx skills add https://github.com/NaNomicon/skills --skill tilth
+```
+
+**Path:** `tilth/SKILL.md`
