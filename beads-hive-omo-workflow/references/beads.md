@@ -20,7 +20,7 @@ Always use `--json` for programmatic use.
 
 ```bash
 # Session start
-bd sync                                          # = bd dolt pull + bd dolt push
+bd sync                                          # Sync local Dolt DB
 bd ready --json                                  # Show unblocked (no-dep) issues
 
 # Issue management
@@ -32,9 +32,9 @@ bd show <id> --json                              # Full issue details
 # Dependencies
 bd update <id> --deps discovered-from:<parent>   # Link related work
 
-# Sync
-bd dolt push                                     # Push issue state to remote
-bd dolt pull                                     # Pull latest from remote
+# Backup (JSONL to git — no Dolt remote needed)
+bd export -o .beads/issues.jsonl                 # Snapshot issue state to file
+git add .beads/issues.jsonl                      # Stage for commit
 
 # Health
 bd doctor                                        # Check DB health
@@ -45,6 +45,24 @@ bd doctor                                        # Check DB health
 **Types**: `bug` | `feature` | `task` | `epic` | `chore` | `decision`
 
 **Statuses**: `open` | `in_progress` | `blocked` | `deferred` | `closed`
+
+---
+
+## Comments
+
+Add notes, status updates, or rationale to an issue. Useful for agents to leave decision trails.
+
+```bash
+bd comments <id>                          # List all comments (JSON: --json)
+bd comments add <id> "text"               # Add a comment
+bd comments add <id> -f notes.txt         # Add comment from file
+bd comments add <id> "text" --author "Agent-Hive"  # Set explicit author
+```
+
+Returns: `{id, issue_id, author, text, created_at}`
+
+Use comments to: record blocked-worker rationale, document decisions, log agent progress notes.
+
 ---
 
 ## Labels (Tags / Scopes)
@@ -365,10 +383,10 @@ bd ready --json          # Pick unblocked work
 
 ### Session end
 ```bash
-bd close <id>            # Mark complete
-git pull --rebase        # Get latest code
-bd dolt push             # Push issue state
-git push                 # Push code
+bd close <id>                              # Mark complete
+bd export -o .beads/issues.jsonl           # Snapshot issue state
+git add .beads/issues.jsonl
+git pull --rebase && git commit -m 'chore(beads): sync issues' && git push
 ```
 
 ---
@@ -388,5 +406,5 @@ Work is NOT done until `git push` succeeds:
 1. `bd create` for any remaining/discovered issues
 2. Run quality gates (tests, linters)
 3. `bd close <id>` for completed work
-4. `git pull --rebase && bd dolt push && git push`
-5. Verify: `git status` shows "up to date with origin"
+4. `bd export -o .beads/issues.jsonl && git add .beads/issues.jsonl`
+5. `git pull --rebase && git commit -m 'chore(beads): sync issues' && git push`
