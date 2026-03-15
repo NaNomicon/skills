@@ -71,18 +71,33 @@ hive_tasks_sync()
 
 Tasks within a batch run **in parallel**. Batches run **sequentially** — context from batch N flows into batch N+1 via `hive_context_write`.
 
-```
-# Batch 1 (parallel)
-hive_worktree_create(task="01-extract-auth-logic")
-hive_worktree_create(task="02-setup-jwt-utils")
-hive_worktree_create(task="03-write-tests")
+**Tool names** (source-verified from swarm.ts + index.ts):
+- `hive_worktree_start(task)` — start a **new** pending/in_progress task
+- `hive_worktree_create(task, continueFrom="blocked", decision)` — resume a **blocked** task ONLY
 
-# After batch 1 completes + orchestrator verifies
+`hive_worktree_start` does NOT directly spawn the worker — it returns a delegation response with a forager prompt. The orchestrator must then call `task()` to spawn each forager.
+
+**For parallel execution, issue all `task()` calls in the SAME response:**
+
+```
+# Step 1: Set up all worktrees for the batch (sequential — fast metadata ops)
+hive_worktree_start(task="01-extract-auth-logic")  # returns forager prompt 1
+hive_worktree_start(task="02-setup-jwt-utils")      # returns forager prompt 2
+hive_worktree_start(task="03-write-tests")          # returns forager prompt 3
+
+# Step 2: Spawn ALL foragers in SAME response → OpenCode runs them concurrently
+task(prompt="<forager-prompt-1>", run_in_background=true)
+task(prompt="<forager-prompt-2>", run_in_background=true)
+task(prompt="<forager-prompt-3>", run_in_background=true)
+
+# After all complete:
 hive_context_write(name="batch-1-results", content="...")
 
-# Batch 2 (context-aware, parallel)
-hive_worktree_create(task="04-wire-middleware")
-hive_worktree_create(task="05-integration-test")
+# Batch 2 (new batch, context-aware)
+hive_worktree_start(task="04-wire-middleware")  # reads batch-1 context
+hive_worktree_start(task="05-integration-test")
+task(prompt="<forager-prompt-4>", run_in_background=true)
+task(prompt="<forager-prompt-5>", run_in_background=true)
 ```
 
 After each batch: run full build + test suite (orchestrator tier). See `references/hive.md` → Two-tier Verification.

@@ -69,6 +69,30 @@ Batch 1 (parallel):          Context flows forward
 
 A **glue task** (or the orchestrator directly) synthesizes Batch N results before Batch N+1 begins. Without this, later tasks lack context.
 
+### How to Execute a Batch (Source-verified from swarm.ts)
+
+**Tool names:**
+- `hive_worktree_start(task)` — start a NEW pending/in_progress task. Returns a delegation response with the forager's prompt.
+- `hive_worktree_create(task, continueFrom="blocked", decision)` — resume a BLOCKED task ONLY.
+
+**Two-step fan-out pattern:**
+
+```
+# Step 1: Set up all worktrees for the batch (fast, sequential)
+hive_worktree_start(task="01-extract-auth-logic")  # → forager prompt 1
+hive_worktree_start(task="02-setup-jwt-utils")      # → forager prompt 2
+hive_worktree_start(task="03-write-tests")          # → forager prompt 3
+
+# Step 2: Spawn ALL foragers in ONE response → OpenCode executes them concurrently
+task(prompt="<forager-prompt-1>", run_in_background=true)
+task(prompt="<forager-prompt-2>", run_in_background=true)
+task(prompt="<forager-prompt-3>", run_in_background=true)
+
+# Wait for all to complete, then write context before next batch
+hive_context_write(name="batch-1-results", content="...")
+```
+
+**Critical**: ALL `task()` calls for a batch MUST be issued in the SAME response. If you issue them across multiple responses, they run sequentially, not in parallel.
 ---
 
 ## Hard Gates
