@@ -25,3 +25,14 @@ npx skills add https://github.com/NaNomicon/skills --skill dev-machine-storage-c
 ```
 
 **Path:** `dev-machine-storage-cleanup/SKILL.md`
+
+### `beads-hive-omo-workflow`
+
+Use for ALL feature-level and project-level work that spans multiple files, tasks, or agents. Covers the full Beads→Hive→OMO stack: project backlog (bd CLI), feature execution (Hive worktrees + batched parallelism), and agent orchestration (OMO categories + delegation). Load when planning a feature, running parallel worktrees, using bd/Beads commands, reserving files, coordinating multiple subagents, or deciding between `@plan` vs `hive_plan_write` vs `task()`.
+
+**Install:** 
+```sh
+npx skills add https://github.com/NaNomicon/skills --skill beads-hive-omo-workflow
+```
+
+**Path:** `beads-hive-omo-workflow/SKILL.md`
