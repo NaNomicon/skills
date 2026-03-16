@@ -1,4 +1,10 @@
-# Beads Village — bd CLI Reference
+# Beads / bd — Backend & Fallback CLI Reference
+
+## When to Load This File
+
+Load this file when you need the **raw `bd` CLI**, the `.beads/` backend layout, Dolt-backed issue state, exports, or backend diagnostics.
+
+For the normal agent-facing workflow — claiming work, reservations, messaging, and shared coordination — load `references/beads-village.md` first.
 
 ## Where Beads Lives
 
@@ -6,11 +12,11 @@
 .beads/                   # Committed to git (config.yaml, README.md, hooks/)
 .beads/dolt/              # Gitignored — managed by Dolt (the versioned DB)
 .beads/.gitignore         # Excludes: dolt/, ephemeral.sqlite3, backup/, .sync.lock
-.reservations/            # LOCAL only — NOT synced via Dolt (agent-machine-local)
-.mail/                    # Messages
 ```
 
 `.beads/` skeleton is checked into git. Issue state lives in Dolt, synced separately.
+
+`/.reservations` and `/.mail` belong to the **beads-village runtime layer**, not the raw `bd` backend. See `references/beads-village.md` for those.
 
 ---
 
@@ -277,9 +283,9 @@ The `--external-ref gh-N` is the canonical link. Always set it when a GH issue e
 
 ---
 
-## Agent Task Selection Patterns
+## Raw CLI Task Selection Patterns
 
-How agents should pick tasks efficiently:
+Use these patterns only when you are operating directly on raw `bd` without the beads-village MCP layer.
 
 ```bash
 # All ready tasks for my role
@@ -301,11 +307,13 @@ bd ready --json | jq '[.[] | select(.parent == "bd-10")]'
 bd find-duplicates "title of new issue"
 ```
 
-Claim flow: `bd ready --json` → pick by priority+label → `bd update <id> --claim` → work → `bd close <id>`
+Raw CLI equivalent of the normal beads-village claim flow: `bd ready --json` → pick by priority+label → `bd update <id> --claim` → work → `bd close <id>`
 
 ---
 
-## Agent Issue Workflow
+## Raw CLI Fallback Workflow
+
+When the MCP layer is unavailable and you must work directly against the backend:
 
 1. `bd ready --json` → pick unblocked issue
 2. `bd update <id> --claim` → claim (atomic)
@@ -321,67 +329,19 @@ Rules:
 
 ---
 
-## Reserve / Release Protocol
-
-### Iron Law
-
-```
-RESERVE BEFORE EDIT. RELEASE WHEN DONE. NO EXCEPTIONS.
-```
-
-Reservations use `O_CREAT|O_EXCL` for atomicity — safe for parallel agents on the **same machine**. They are NOT distributed across machines (local filesystem only, under `.reservations/`).
-
-### Worker Checklist
-
-```
-1. init()                                          # Register (idempotent)
-2. inbox(unread=true)                              # Check messages
-3. reservations()                                  # Check existing locks
-4. reserve(paths=[FILES], reason=TASK, ttl=600)    # Lock files you will edit
-5. [DO WORK]                                       # Edit ONLY reserved files
-6. release()                                       # Unlock all
-7. msg(subj="Done: SUMMARY", global=true, to="all") # Notify team
-```
-
-**Blocked?** → `release()` first → `msg(subj="Blocked: REASON", ...)` → `hive_worktree_commit(status="blocked")`
-
-**Resuming?** → Start from step 1. Previous reservations may have expired.
-
-### Conflict Resolution
-
-```
-reserve() returns conflicts?
-├── Expires soon (< 2 min)? → Wait, retry
-├── Can work on other files? → Reserve those first, come back
-├── Urgent? → msg(to="locking-agent") → Wait for inbox() response
-└── Fully blocked? → release() → hive_worktree_commit(status="blocked")
-```
-
-Never force-edit a reserved file.
-
-### Recovery
-
-| Problem | Fix |
-|---------|-----|
-| Stale lock | `reservations()` then retry `reserve()` |
-| Lost session | `init()` → `release()` → re-reserve |
-| Tool errors | `doctor()` then `sync()` |
-
----
-
 ## Multi-Dev Sync
 
 - Dolt syncs **issue state** across developers (`bd sync` = dolt pull + push)
-- Reservations protect **parallel agents on the same machine** (Hive foragers in worktrees)
+- Reservations are handled by the **beads-village** coordination layer (same-machine/workspace runtime)
 - Cross-machine file conflicts are normal git merge territory — Beads doesn't solve those
 
-### Session start
+### Fallback session start
 ```bash
 bd sync                  # Get latest issues from team
 bd ready --json          # Pick unblocked work
 ```
 
-### Session end
+### Fallback session end
 ```bash
 bd close <id>                              # Mark complete
 bd export -o .beads/issues.jsonl           # Snapshot issue state
@@ -391,15 +351,9 @@ git pull --rebase && git commit -m 'chore(beads): sync issues' && git push
 
 ---
 
-## Hive Bridge Tools (auto-activate when `.hive/` exists)
-
-- `hive_lock(paths, task, ttl=900)` — Reserve files for a Hive task
-- `hive_unlock()` — Release all Hive-tagged locks
-- `hive_status_bridge()` — Combined Hive + Beads status
-
----
-
 ## Session Completion Ritual (Landing the Plane)
+
+Fallback/backend ritual when you are operating directly on raw `bd` state:
 
 Work is NOT done until `git push` succeeds:
 
@@ -408,3 +362,5 @@ Work is NOT done until `git push` succeeds:
 3. `bd close <id>` for completed work
 4. `bd export -o .beads/issues.jsonl && git add .beads/issues.jsonl`
 5. `git pull --rebase && git commit -m 'chore(beads): sync issues' && git push`
+
+In the normal beads-village-first workflow, prefer `beads-village_done(...)` / `beads-village_sync()` and only drop to this raw CLI path when you explicitly need backend fallback.
