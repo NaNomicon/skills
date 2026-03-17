@@ -186,6 +186,15 @@ Shows directory tree with token estimates. **Use once per session** to orient yo
 
 ---
 
+## Security
+
+tilth reads files directly, including dotfiles like `.env`. Most AI agents have built-in secret redaction — rely on those safeguards. If your agent doesn't auto-redact:
+
+- Never output `API_KEY`, `SECRET`, `PASSWORD`, `TOKEN` values verbatim
+- Redact with `<REDACTED>` and note the secret type only
+
+---
+
 ## Pitfalls
 
 ### Classification surprises
