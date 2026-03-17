@@ -1,0 +1,42 @@
+name: Daily Skill Badges
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-badges:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run badge generator
+        run: python scripts/generate_skill_badges.py --repo-root . --output-dir badges --source-repo NaNomicon/skills
+
+      - name: Run generator tests
+        run: python -m unittest tests/test_generate_skill_badges.py
+
+      - name: Commit refreshed badges
+        run: |
+          git add badges
+          if git diff --cached --quiet; then
+            echo "No badge changes to commit"
+            exit 0
+          fi
+          git commit -m "chore(badges): refresh generated skill badges"
+          git push
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
