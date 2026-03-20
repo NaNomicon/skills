@@ -1,7 +1,6 @@
 ---
 name: git-workflow-common
 description: Use when an agent needs to operate a repository workflow through issues, labels, milestones, and PRs/MRs using the common free-tier features shared by GitHub and GitLab. Reach for this whenever the task involves updating issue state, expressing blockers portably, linking implementation to issues, or keeping workflow semantics provider-agnostic while still allowing GitHub- or GitLab-specific references.
-compatibility: Requires GitHub and/or GitLab access through available tools such as gh, provider APIs, or browser/MCP integrations. Works best for single-repo workflows.
 ---
 
 # Git Workflow Common
@@ -30,6 +29,23 @@ Treat these objects as distinct:
 
 If a board view disagrees with labels or issue content, trust the issue record and labels.
 
+## Responsibility split
+
+| Concern | Canonical owner | Notes |
+|---|---|---|
+| Task meaning and acceptance | Issue | The issue body and comments explain what the work is and what done means. |
+| Status and lightweight metadata | Labels | Status, priority, and type should stay machine-readable through labels. |
+| Release grouping | Milestone | Optional grouping only; do not overload it as task state. |
+| Code review and merge state | PR/MR | Review discussion and merge outcome live here, but task state stays on the issue. |
+| Visualization | Board / Project view | Useful for humans, never the source of truth. |
+
+If you are unsure where workflow state belongs:
+
+- **task identity or blocker explanation** → issue
+- **state / priority / type** → labels
+- **review / merge status** → PR/MR
+- **visual organization only** → board or project
+
 ## Canonical workflow semantics
 
 Use one status value at a time. A portable default set is:
@@ -56,6 +72,37 @@ Optional type labels:
 
 Do not assume weights, epics, iterations, dependency graphs, or provider-specific hierarchy features are available.
 
+## Portable issue schema
+
+When the repo uses templates or standardized issue bodies, prefer a compact portable structure like:
+
+```md
+## Goal
+...
+
+## Acceptance Criteria
+- ...
+
+## Status
+status:ready
+
+## Priority
+priority:medium
+
+## Blocked by
+none
+
+## Primary PR/MR
+none
+```
+
+The exact headings can vary by repository, but the workflow semantics should stay stable:
+
+- **status** belongs in one canonical status label
+- **priority** belongs in one priority label
+- **blocked by** should be explicit in the issue body or comments
+- **primary PR/MR** should point to the active delivery artifact when one exists
+
 ## Agent operating rules
 
 1. Treat the issue as the canonical work record.
@@ -65,23 +112,6 @@ Do not assume weights, epics, iterations, dependency graphs, or provider-specifi
 5. Mutate issue state directly when needed for execution, but make the smallest correct update.
 6. Prefer portable conventions over provider-specific features when both can solve the task.
 7. If provider-specific features are used, keep the portable representation updated too.
-
-## Responsibility split
-
-| Concern | Canonical owner | Notes |
-|---|---|---|
-| Task meaning and acceptance | Issue | The issue body and comments explain what the work is and what done means. |
-| Status and lightweight metadata | Labels | Status, priority, and type should stay machine-readable through labels. |
-| Release grouping | Milestone | Optional grouping only; do not overload it as task state. |
-| Code review and merge state | PR/MR | Review discussion and merge outcome live here, but task state stays on the issue. |
-| Visualization | Board / Project view | Useful for humans, never the source of truth. |
-
-If you are unsure where workflow state belongs:
-
-- **task identity or blocker explanation** → issue
-- **state / priority / type** → labels
-- **review / merge status** → PR/MR
-- **visual organization only** → board or project
 
 ## Choosing your entry point
 
@@ -144,6 +174,16 @@ Start from the issue record whenever possible. Treat provider-specific board or 
    - After mutation, re-check issue labels, body fields, and PR/MR linkage.
    - Do not assume the provider UI or API call did what you intended without verification.
 
+## Mutation checklist
+
+Use this checklist before and after any workflow update:
+
+- Is there exactly one active status label?
+- Does the priority label still match the task?
+- Is the blocker state explicit and current?
+- Does the issue body still point to the right primary PR/MR?
+- If a board/project view disagrees, did you fix the issue record instead of trusting the board?
+
 ## Portable blocker model
 
 Use a plain, explicit representation that works everywhere.
@@ -190,6 +230,7 @@ Do not leave a task implicitly blocked in comments while labels still say `statu
 - Use closing or related references according to provider conventions.
 - Do not let task coordination drift into PR/MR comments alone.
 - If implementation spans more than one issue, still choose one primary issue and mention the others as related work.
+- If the PR/MR is open, the issue should make that relationship easy to discover.
 
 ## Decision rules
 

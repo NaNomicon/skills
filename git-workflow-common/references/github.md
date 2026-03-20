@@ -1,68 +1,113 @@
 # GitHub Reference
 
-Use this reference when the portable workflow needs to be executed through GitHub-specific mechanics.
+Use this reference when the repository workflow runs on GitHub or when the task requires GitHub-specific mechanics. Keep the portable semantics from `../SKILL.md` as the source of truth.
 
-## Core GitHub objects
+## Canonical mapping
 
-- Issues
-- Labels
-- Milestones
-- Pull requests
-- Projects / board views
-- Comments, mentions, and cross-references
+| Portable concern | GitHub mechanic |
+|---|---|
+| Issue record | GitHub Issue |
+| Status | Labels such as `status:ready`, `status:blocked` |
+| Priority | Labels such as `priority:high` |
+| Release grouping | Milestones |
+| Delivery artifact | Pull Request |
+| Visualization | Projects / project boards |
 
-GitHub Projects can visualize work, but the issue and its labels remain the canonical workflow record.
+## Labels
 
-## Preferred mechanics
+Use labels as the canonical machine-readable workflow state. Keep exactly one active status label at a time.
 
-If `gh` is available, it is usually the cleanest direct interface.
+Relevant docs:
+- https://docs.github.com/en/issues/tracking-your-work-with-labels/about-labels
+- https://docs.github.com/en/issues/using-labels-and-milestones-to-track-work/managing-labels
 
-Common operations include:
+Operational guidance:
+- prefer status and priority labels over board-only state
+- remove contradictory status labels instead of adding a new one on top
+- treat label changes as the canonical state mutation
 
-- viewing an issue and comments
-- editing title/body
-- adding or removing labels
-- assigning users
-- linking PRs through references in PR body or issue comments
+## Milestones
 
-## Portable status mutation on GitHub
+Use milestones for release or iteration grouping only. Do not overload milestones with status semantics.
 
-When changing issue state:
+Relevant doc:
+- https://docs.github.com/en/issues/tracking-your-work-with-issues/about-milestones
 
-1. read the existing labels first
-2. remove the old `status:*` label
-3. add the new `status:*` label
-4. update the issue body if blocker or linkage fields changed
-5. verify the final label set
+## Issue templates and forms
 
-Do not assume moving a card in Projects is enough. If Projects is used, it should mirror labels rather than replace them.
+Use templates or issue forms when the repository supports them so issues consistently capture goal, acceptance criteria, blockers, and related delivery artifacts.
 
-## PR linkage on GitHub
+Relevant docs:
+- https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issue-forms
+- https://docs.github.com/en/issues/tracking-your-work-with-issues/about-templates-for-issues-and-pull-requests
 
-Preferred references in PR bodies:
+Recommended portable fields:
+- Goal
+- Acceptance Criteria
+- Blocked by
+- Primary PR
 
-- `Closes #123`
-- `Related to #123`
+## Pull request linkage
 
-Use `Closes` only when merge should close the issue. Otherwise prefer a non-closing relationship.
+GitHub supports linking pull requests to issues and automatically closing issues on merge. Use that for delivery linkage, but keep the issue body and labels authoritative for workflow state.
 
-## Blocker representation on GitHub
+Relevant doc:
+- https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue
 
-Use explicit body fields or comments such as:
+Operational guidance:
+- one PR should name one primary issue
+- use closing or related references in the PR body
+- if the PR is open, make sure the issue can point back to it when useful
+- do not let workflow coordination live only in PR comments
+
+## Projects and boards
+
+GitHub Projects and project boards are useful views, not the canonical task record.
+
+Relevant docs:
+- https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects
+- https://docs.github.com/en/issues/planning-and-tracking-with-kanban/managing-project-boards/about-project-boards
+
+Operational guidance:
+- if a project column disagrees with labels, fix labels first
+- do not assume moving a card means the task record is now correct
+
+## Automation surfaces
+
+GitHub provides two common automation paths for workflow mutation:
+- `gh` CLI for direct issue and PR operations
+- GitHub Actions for event-driven workflow updates
+
+Relevant docs:
+- https://docs.github.com/en/issues/tracking-your-work-with-issues/using-the-github-cli
+- https://docs.github.com/en/actions/using-workflows/about-workflows
+
+Use automation to apply the same portable rules more consistently, not to invent a second hidden state machine.
+
+## Blockers on GitHub
+
+GitHub does not provide a portable, first-class blocker model you should depend on for this skill. Represent blockers explicitly in the issue body or comments using portable text such as:
 
 ```md
 ## Blocked by
 #123
 ```
 
-Pair that with:
+Then align labels accordingly:
+- add `status:blocked`
+- remove the previous active status label
+- restore the correct active status when the blocker clears
 
-- `status:blocked`
-- removal of the previous active status label
+## Preferred operating order
 
-## Pitfalls to avoid
+1. Read the issue body, labels, milestone, recent comments, and PR state.
+2. Normalize labels so there is one active status.
+3. Apply the smallest correct mutation through issue labels or body updates.
+4. Keep PR linkage explicit.
+5. Re-check the issue after mutation rather than trusting the UI.
 
-- Relying only on Project column state
-- Encoding status only in issue titles
-- Spreading task state across many comments without updating the canonical issue record
-- Letting one PR silently cover multiple unrelated issues without naming a primary issue
+## Things not to rely on
+
+- project columns as source of truth
+- hidden blocker state that exists only in comments without label updates
+- GitHub-only conventions that cannot be mirrored in the issue record
