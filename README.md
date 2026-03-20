@@ -18,7 +18,6 @@ npx skills add https://github.com/NaNomicon/skills --skill <skill-name>
 | --- | --- | --- |
 | `dokploy-admin` | Dokploy deployment and operations | You need to operate or troubleshoot Dokploy safely across MCP, API, CLI, or SSH/Docker |
 | `dev-machine-storage-cleanup` | Low disk space on dev machines | A machine is running out of storage and you need a safe, structured cleanup flow |
-| `beads-hive-omo-workflow` | Multi-step, multi-agent feature execution | Work spans multiple files, agents, or worktrees and needs beads-village / Hive / OMO coordination |
 | `tilth` | Structural code navigation | You need to read, search, trace, or map code without falling back to raw `read` / `grep` / `find` |
 | `git-workflow-common` | Issue-driven GitHub/GitLab workflow operation | An agent needs to operate issues, labels, blockers, and PRs/MRs portably across the common features of GitHub and GitLab |
 
@@ -73,32 +72,6 @@ npx skills add https://github.com/NaNomicon/skills --skill dev-machine-storage-c
 ```
 
 **Path:** `dev-machine-storage-cleanup/SKILL.md`
-
----
-
-## `beads-hive-omo-workflow`
-
-[![Weekly Installs](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fskills.sh%2Fapi%2Fsearch%3Fq%3Dbeads-hive-omo-workflow%26limit%3D10&label=Weekly%20Installs&query=%24.skills%5B0%5D.installs)](https://skills.sh/nanomicon/skills/beads-hive-omo-workflow)
-[![Socket](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fadd-skill.vercel.sh%2Faudit%3Fsource%3Dnanomicon%2Fskills%26skills%3Dbeads-hive-omo-workflow&label=Socket&query=%24%5B%22beads-hive-omo-workflow%22%5D.socket.risk)](https://skills.sh/nanomicon/skills/beads-hive-omo-workflow/security/socket)
-[![Snyk](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fadd-skill.vercel.sh%2Faudit%3Fsource%3Dnanomicon%2Fskills%26skills%3Dbeads-hive-omo-workflow&label=Snyk&query=%24%5B%22beads-hive-omo-workflow%22%5D.snyk.risk)](https://skills.sh/nanomicon/skills/beads-hive-omo-workflow/security/snyk)
-[![ATH](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fadd-skill.vercel.sh%2Faudit%3Fsource%3Dnanomicon%2Fskills%26skills%3Dbeads-hive-omo-workflow&label=ATH&query=%24%5B%22beads-hive-omo-workflow%22%5D.ath.risk)](https://skills.sh/nanomicon/skills/beads-hive-omo-workflow/security/agent-trust-hub)
-
-**What it is**  
-A workflow skill for multi-file and multi-agent execution using the **beads-village → Hive → OMO** stack. It treats `beads-village` as the primary coordination layer, Hive as the feature execution/worktree layer, and OMO as the delegation and one-shot execution layer. Raw Beads / `bd` remains documented as backend and fallback context.
-
-**When to use it**  
-Use it when work spans multiple files, tasks, or agents; when you need reservations or shared task state; when using `beads-village` MCP tools or Hive worktrees; or when deciding whether a unit of work belongs in `beads-village`, `hive_*`, or OMO `task()`.
-
-**Why use it**  
-This skill exists to keep coordination boundaries clear. Without it, agents tend to blur ownership between backlog state, worktree execution, and one-shot delegation. The skill gives a consistent rule: claim in beads-village, execute in Hive or OMO, and treat raw `bd` as backend/fallback rather than the default interface.
-
-**Install**
-
-```sh
-npx skills add https://github.com/NaNomicon/skills --skill beads-hive-omo-workflow
-```
-
-**Path:** `beads-hive-omo-workflow/SKILL.md`
 
 ---
 

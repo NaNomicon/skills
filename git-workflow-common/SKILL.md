@@ -66,6 +66,58 @@ Do not assume weights, epics, iterations, dependency graphs, or provider-specifi
 6. Prefer portable conventions over provider-specific features when both can solve the task.
 7. If provider-specific features are used, keep the portable representation updated too.
 
+## Responsibility split
+
+| Concern | Canonical owner | Notes |
+|---|---|---|
+| Task meaning and acceptance | Issue | The issue body and comments explain what the work is and what done means. |
+| Status and lightweight metadata | Labels | Status, priority, and type should stay machine-readable through labels. |
+| Release grouping | Milestone | Optional grouping only; do not overload it as task state. |
+| Code review and merge state | PR/MR | Review discussion and merge outcome live here, but task state stays on the issue. |
+| Visualization | Board / Project view | Useful for humans, never the source of truth. |
+
+If you are unsure where workflow state belongs:
+
+- **task identity or blocker explanation** → issue
+- **state / priority / type** → labels
+- **review / merge status** → PR/MR
+- **visual organization only** → board or project
+
+## Choosing your entry point
+
+| Situation | Route |
+|---|---|
+| New task exists but is unclear | Inspect issue body, comments, labels, and milestone first; normalize before changing state |
+| Task is ready to begin | Verify acceptance criteria and blocker field, then move to `status:in_progress` |
+| Work already has an open PR/MR | Treat the issue as canonical, then reconcile issue state with PR/MR state |
+| Task is blocked | Update blocker field and move to `status:blocked` |
+| PR/MR merged and task should close | Verify completion against issue criteria, then move to `status:done` and close if appropriate |
+
+Start from the issue record whenever possible. Treat provider-specific board or project views as secondary navigation aids.
+
+## Issue lifecycle
+
+### Start of work
+
+1. Read the issue record fully.
+2. Check whether the task is actually ready.
+3. Confirm there is no unresolved blocker.
+4. Normalize labels and body fields before starting.
+5. Move to `status:in_progress` only when execution has really begun.
+
+### During work
+
+- Keep the issue state current as execution changes.
+- Add or update PR/MR references when implementation artifacts appear.
+- Prefer small, direct issue mutations over long comment threads that leave the canonical record stale.
+
+### End of work
+
+1. Verify that the PR/MR state and issue state agree.
+2. Confirm the issue acceptance criteria are actually satisfied.
+3. Move the issue to `status:done`.
+4. Close the issue only when completion is real, not merely assumed from activity.
+
 ## Standard operating sequence
 
 1. **Inspect the task record**
@@ -121,6 +173,16 @@ When unblocked:
 - remove `status:blocked`
 - restore the correct active status, usually `status:ready` or `status:in_progress`
 - update the blocker field accordingly
+
+## Blocked task protocol
+
+1. Confirm the task cannot proceed with the information or dependencies currently available.
+2. Update the issue body or comment with the concrete blocker, using a portable reference such as `Blocked by: #123` or `Blocked by: external dependency`.
+3. Remove the previous active status label.
+4. Add `status:blocked`.
+5. When the blocker clears, remove `status:blocked`, update the blocker field, and restore the correct active status.
+
+Do not leave a task implicitly blocked in comments while labels still say `status:in_progress` or `status:ready`.
 
 ## PR/MR linkage rules
 
