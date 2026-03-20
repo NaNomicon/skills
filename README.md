@@ -20,6 +20,7 @@ npx skills add https://github.com/NaNomicon/skills --skill <skill-name>
 | `dev-machine-storage-cleanup` | Low disk space on dev machines | A machine is running out of storage and you need a safe, structured cleanup flow |
 | `beads-hive-omo-workflow` | Multi-step, multi-agent feature execution | Work spans multiple files, agents, or worktrees and needs beads-village / Hive / OMO coordination |
 | `tilth` | Structural code navigation | You need to read, search, trace, or map code without falling back to raw `read` / `grep` / `find` |
+| `git-workflow-common` | Issue-driven GitHub/GitLab workflow operation | An agent needs to operate issues, labels, blockers, and PRs/MRs portably across the common features of GitHub and GitLab |
 
 ---
 
@@ -124,3 +125,29 @@ npx skills add https://github.com/NaNomicon/skills --skill tilth
 ```
 
 **Path:** `tilth/SKILL.md`
+
+---
+
+## `git-workflow-common`
+
+[![Weekly Installs](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fskills.sh%2Fapi%2Fsearch%3Fq%3Dgit-workflow-common%26limit%3D10&label=Weekly%20Installs&query=%24.skills%5B0%5D.installs)](https://skills.sh/nanomicon/skills/git-workflow-common)
+[![Socket](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fadd-skill.vercel.sh%2Faudit%3Fsource%3Dnanomicon%2Fskills%26skills%3Dgit-workflow-common&label=Socket&query=%24%5B%22git-workflow-common%22%5D.socket.risk)](https://skills.sh/nanomicon/skills/git-workflow-common/security/socket)
+[![Snyk](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fadd-skill.vercel.sh%2Faudit%3Fsource%3Dnanomicon%2Fskills%26skills%3Dgit-workflow-common&label=Snyk&query=%24%5B%22git-workflow-common%22%5D.snyk.risk)](https://skills.sh/nanomicon/skills/git-workflow-common/security/snyk)
+[![ATH](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fadd-skill.vercel.sh%2Faudit%3Fsource%3Dnanomicon%2Fskills%26skills%3Dgit-workflow-common&label=ATH&query=%24%5B%22git-workflow-common%22%5D.ath.risk)](https://skills.sh/nanomicon/skills/git-workflow-common/security/agent-trust-hub)
+
+**What it is**  
+A workflow skill for agents operating issue-driven GitHub or GitLab repositories through the common free-tier feature set. It keeps workflow semantics portable by treating issues as canonical task records, labels as canonical state, and PRs/MRs as delivery artifacts.
+
+**When to use it**  
+Use it when an agent needs to inspect or mutate issue state, manage labels, express blockers portably, keep one primary issue per PR/MR, or operate a repo workflow without coupling the process to provider-specific planning features.
+
+**Why use it**  
+Issue workflows often drift into provider-specific UI behavior or hidden agent memory. This skill exists to keep the workflow explicit, machine-readable, and portable while still allowing GitHub- or GitLab-specific execution details where needed.
+
+**Install**
+
+```sh
+npx skills add https://github.com/NaNomicon/skills --skill git-workflow-common
+```
+
+**Path:** `git-workflow-common/SKILL.md`
