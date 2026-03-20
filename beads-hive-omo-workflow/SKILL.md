@@ -1,6 +1,6 @@
 ---
 name: beads-hive-omo-workflow
-description: "Use for feature-level or project-level work that spans multiple files, tasks, or agents. Load when using beads-village MCP tools, Hive worktrees, file reservations, shared task coordination, or deciding between `beads-village`, `hive_*`, and OMO `task()`. Also load when resuming blocked Hive work or when Beads / `bd` backend fallback may be needed behind a beads-village-managed workflow."
+description: "Use for feature-level or project-level work that spans multiple files, tasks, or agents. Load when using beads-village MCP tools, Hive worktrees, file reservations, shared task coordination, or deciding between `beads-village`, `hive_*`, and OMO `task()`. Beads Village is the default agent-facing interface; Beads / `bd` is backend/full-CLI fallback only. Also load when resuming blocked Hive work or when Beads / `bd` backend fallback may be needed behind a beads-village-managed workflow."
 ---
 
 # beads-village → Hive → OMO Workflow
@@ -15,7 +15,7 @@ Three-layer coordination stack for feature development with parallel agents.
 beads-village (MCP)      — Project/shared coordination: claim, task state, reservations, messaging, sync
 Hive (opencode-hive)     — Feature execution: plans, execution tasks, worktrees, batched parallelism
 OMO (oh-my-openagent)    — Agent layer: delegation, research, one-shot execution
-Beads / bd               — Backend/CLI under beads-village (fallback + implementation detail)
+Beads / bd               — Canonical backend/full CLI under beads-village (fallback + implementation detail)
 ```
 
 **Primary rule**: **Claim in beads-village, execute in Hive or OMO, reserve through beads-village.**
@@ -35,14 +35,14 @@ Beads / bd               — Backend/CLI under beads-village (fallback + impleme
 | Feature plan + execution tasks | Hive | `hive_feature_create`, `hive_plan_write`, `hive_tasks_sync`, `hive_worktree_*` |
 | Worktree execution | Hive | `hive_worktree_start`, `hive_worktree_create`, `hive_merge` |
 | Research / one-shot execution | OMO | `task()` |
-| Backend / CLI fallback | Beads / `bd` | `bd ...` commands in `references/beads.md` |
+| Backend / CLI fallback | Beads / `bd` | `bd ...` commands in `references/beads.md`; use only when Village lacks the needed capability |
 
 If you are unsure who owns something:
 - **shared coordination / locking** → beads-village
 - **feature plan / worktree execution** → Hive
 - **one-shot work or delegation** → OMO
 
-For exact MCP coordination semantics, load `references/beads-village.md`. Load `references/beads.md` only when you need backend or raw CLI fallback behavior.
+For exact MCP coordination semantics, load `references/beads-village.md` first for normal workflow. Load `references/beads.md` only when you need backend or raw CLI fallback behavior. Do not start with raw `bd` when a Beads Village tool covers the same workflow step.
 
 ---
 
